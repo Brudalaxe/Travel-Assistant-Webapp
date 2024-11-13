@@ -1,4 +1,3 @@
-# README.md
 # Travel Assistant API
 
 A Flask-based REST API that provides weather information and city reviews.
