@@ -1,4 +1,4 @@
-# Travel Assistant API
+# Travel Assistant
 
 A Flask-based REST API that provides weather information and city reviews.
 
