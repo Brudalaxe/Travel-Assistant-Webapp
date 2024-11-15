@@ -45,17 +45,6 @@ env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the root directory with the following:
-```
-WEATHER_API_KEY=1234567890abcdef1234567890abcdef
-SECRET_KEY=your-super-secret-key-123
-GOOGLE_APPLICATION_CREDENTIALS=instance1-438012-68c10ad17369.json
-```
-
-5. Download the Google Cloud credentials file:
-- Download the provided `instance1-438012-68c10ad17369.json` file
-- Place it in your project root directory
-
 ## Running the Application
 
 1. Make sure your virtual environment is activated
@@ -63,7 +52,7 @@ GOOGLE_APPLICATION_CREDENTIALS=instance1-438012-68c10ad17369.json
 ```bash
 python run.py
 ```
-3. Visit `http://localhost:8080` in your web browser
+3. Visit the link that is provided in the terminal
 
 ## Using the Web Interface
 
