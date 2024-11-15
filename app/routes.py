@@ -1,12 +1,27 @@
 # app/routes.py
-from flask import jsonify, request
-from app import app, db
+from flask import Blueprint, jsonify, request, current_app
 import requests
 from app.auth import token_required
 from app.utils import validate_rating
 import os
 
-@app.route('/api/weather/<city>', methods=['GET'])
+main = Blueprint('main', __name__)
+
+@main.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        'message': 'Welcome to the Travel Assistant API',
+        'endpoints': {
+            'weather': '/api/weather/<city>',
+            'reviews': '/api/reviews/<city>',
+            'auth': {
+                'register': '/api/register',
+                'login': '/api/login'
+            }
+        }
+    }), 200
+
+@main.route('/api/weather/<city>', methods=['GET'])
 def get_weather(city):
     """
     Get weather information for a specific city using OpenWeatherMap API
@@ -26,19 +41,19 @@ def get_weather(city):
     except requests.exceptions.RequestException as e:
         return jsonify({'error': 'City not found'}), 404
 
-@app.route('/api/reviews/<city>', methods=['GET'])
+@main.route('/api/reviews/<city>', methods=['GET'])
 def get_reviews(city):
     """
     Get all reviews for a specific city
     """
     try:
-        reviews_ref = db.collection('reviews').where('city', '==', city).stream()
+        reviews_ref = current_app.db.collection('reviews').where('city', '==', city).stream()
         reviews = [doc.to_dict() for doc in reviews_ref]
         return jsonify(reviews), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/reviews/<city>', methods=['POST'])
+@main.route('/api/reviews/<city>', methods=['POST'])
 @token_required
 def add_review(current_user, city):
     """
@@ -57,7 +72,7 @@ def add_review(current_user, city):
             'username': current_user['email']
         }
         
-        db.collection('reviews').add(review)
+        current_app.db.collection('reviews').add(review)
         return jsonify({'message': 'Review added successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500

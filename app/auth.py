@@ -1,11 +1,12 @@
 # app/auth.py
 from functools import wraps
-from flask import request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
 import jwt
 import datetime
 import os
+
+auth = Blueprint('auth', __name__)
 
 def token_required(f):
     @wraps(f)
@@ -27,19 +28,19 @@ def token_required(f):
     return decorated
 
 def get_user_by_id(user_id):
-    user_doc = db.collection('users').document(user_id).get()
+    user_doc = current_app.db.collection('users').document(user_id).get()
     if user_doc.exists:
         return {'id': user_id, **user_doc.to_dict()}
     return None
 
-@app.route('/api/register', methods=['POST'])
+@auth.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
     
     if not data or not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    user_ref = db.collection('users').where('email', '==', data['email']).limit(1).get()
+    user_ref = current_app.db.collection('users').where('email', '==', data['email']).limit(1).get()
     if len(list(user_ref)) > 0:
         return jsonify({'error': 'User already exists'}), 400
     
@@ -49,17 +50,17 @@ def register():
         'created_at': datetime.datetime.now()
     }
     
-    user_ref = db.collection('users').add(new_user)
+    user_ref = current_app.db.collection('users').add(new_user)
     return jsonify({'message': 'User created successfully'}), 201
 
-@app.route('/api/login', methods=['POST'])
+@auth.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     
     if not data or not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    user_ref = db.collection('users').where('email', '==', data['email']).limit(1).get()
+    user_ref = current_app.db.collection('users').where('email', '==', data['email']).limit(1).get()
     
     for user in user_ref:
         if check_password_hash(user.to_dict()['password'], data['password']):
