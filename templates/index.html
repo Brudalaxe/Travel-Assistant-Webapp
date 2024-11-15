@@ -1,1 +1,23 @@
-# index.html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center mb-5">
+        <h1 class="display-4 mb-4">Travel Assistant</h1>
+        <p class="lead text-muted">Discover weather and reviews for your next destination</p>
+    </div>
+    <div class="col-md-6">
+        <div class="search-container">
+            <form method="GET" action="{{ url_for('main.search_city') }}" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="city" class="form-control form-control-lg" 
+                           placeholder="Enter city name" required>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-5">
+            <div class="card-header">
+                <h2 class="text-center">Login</h2>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="alert alert-danger" id="errorMessage" style="display: none;"></div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <a href="{{ url_for('main.register_page') }}" class="btn btn-outline-primary">Register</a>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Home</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = this.email.value;
+        const password = this.password.value;
+        
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Store the token
+                localStorage.setItem('token', data.token);
+                // Store the email for display
+                localStorage.setItem('userEmail', email);
+                // Redirect back to previous page or home
+                const returnTo = sessionStorage.getItem('returnTo') || '/';
+                window.location.href = returnTo;
+            } else {
+                document.getElementById('errorMessage').textContent = data.error || 'Login failed';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').textContent = 'An error occurred';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}

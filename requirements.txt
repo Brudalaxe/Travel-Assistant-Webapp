@@ -1,4 +1,5 @@
 flask
+flask_talisman
 google-cloud-firestore
 python-dotenv
 requests

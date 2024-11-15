@@ -1,7 +1,0 @@
-# app.yaml
-runtime: python39
-entrypoint: gunicorn -b :$PORT 'app:app'
-
-env_variables:
-  WEATHER_API_KEY: ""
-  SECRET_KEY: ""

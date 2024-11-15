@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-4">{{ city }}</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-cloud weather-icon"></i>
+                <p class="temperature mb-2">{{ weather.temperature }}°C</p>
+                <p class="h5 mb-3 text-capitalize">{{ weather.description }}</p>
+                
+                <div class="row g-3 mt-2">
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-tint text-primary"></i>
+                            <p class="mb-0">{{ weather.humidity }}%</p>
+                            <small class="text-muted">Humidity</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-wind text-info"></i>
+                            <p class="mb-0">{{ weather.wind_speed }} m/s</p>
+                            <small class="text-muted">Wind Speed</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-temperature-high text-danger"></i>
+                            <p class="mb-0">{{ weather.temp_max }}°C</p>
+                            <small class="text-muted">Max Temp</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-temperature-low text-info"></i>
+                            <p class="mb-0">{{ weather.temp_min }}°C</p>
+                            <small class="text-muted">Min Temp</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-compress-arrows-alt text-warning"></i>
+                            <p class="mb-0">{{ weather.pressure }} hPa</p>
+                            <small class="text-muted">Pressure</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light">
+                            <i class="fas fa-eye text-success"></i>
+                            <p class="mb-0">{{ weather.visibility/1000 }} km</p>
+                            <small class="text-muted">Visibility</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0">Reviews</h2>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                        <i class="fas fa-plus me-2"></i>Add Review
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if reviews %}
+                    <div class="text-center mb-4 p-3 bg-light rounded">
+                        <h3 class="h5 mb-3">Average Rating</h3>
+                        <div class="display-4 mb-2">{{ "%.1f"|format(average_rating) }}</div>
+                        <div class="text-warning mb-2">
+                            {% for _ in range(average_rating|int) %}
+                                <i class="fas fa-star"></i>
+                            {% endfor %}
+                            {% if (average_rating % 1) >= 0.5 %}
+                                <i class="fas fa-star-half-alt"></i>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Based on {{ reviews|length }} reviews</small>
+                    </div>
+
+                    <h4 class="h6 mb-3">Recent Reviews</h4>
+                    {% for review in recent_reviews %}
+                    <div class="review-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user-circle me-2"></i>{{ review.username }}
+                            </h6>
+                            <div class="text-warning">
+                                {% for _ in range(review.rating) %}
+                                <i class="fas fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="mb-0 text-muted">{{ review.comment }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-comment-slash fa-3x mb-3"></i>
+                        <p>No reviews yet. Be the first to review!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Search
+    </a>
+</div>
+
+<div class="modal fade" id="addReviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Review for {{ city }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="loginSection">
+                    <div class="alert alert-info">
+                        Please log in or register to add a review
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button onclick="handleLogin()" class="btn btn-primary">Login</button>
+                        <button onclick="handleRegister()" class="btn btn-outline-primary">Register</button>
+                    </div>
+                </div>
+                <form id="reviewForm" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <select class="form-select" name="rating" required>
+                            <option value="1">1 ⭐</option>
+                            <option value="2">2 ⭐⭐</option>
+                            <option value="3">3 ⭐⭐⭐</option>
+                            <option value="4">4 ⭐⭐⭐⭐</option>
+                            <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comment</label>
+                        <textarea class="form-control" name="comment" rows="3" required></textarea>
+                    </div>
+                    <div class="alert alert-danger" id="errorMessage" style="display: none;"></div>
+                    <div class="alert alert-success" id="successMessage" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function handleLogin() {
+        // Store the current URL to return after login
+        sessionStorage.setItem('returnTo', window.location.href);
+        window.location.href = '/login';
+    }
+    
+    function handleRegister() {
+        // Store the current URL to return after registration
+        sessionStorage.setItem('returnTo', window.location.href);
+        window.location.href = '/register';
+    }
+    
+    // Format date helper function
+    function formatDate(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleDateString('en-GB');
+    }
+    
+    // Check authentication status when modal opens
+    document.getElementById('addReviewModal').addEventListener('show.bs.modal', function () {
+        const token = localStorage.getItem('token');
+        const reviewForm = document.getElementById('reviewForm');
+        const loginSection = document.getElementById('loginSection');
+        
+        if (token) {
+            reviewForm.style.display = 'block';
+            loginSection.style.display = 'none';
+        } else {
+            reviewForm.style.display = 'none';
+            loginSection.style.display = 'block';
+        }
+    });
+
+    // Review form submission handler
+    document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('errorMessage').textContent = 'Please log in to add a review';
+            document.getElementById('errorMessage').style.display = 'block';
+            return;
+        }
+
+        const rating = this.rating.value;
+        const comment = this.comment.value;
+        const city = '{{ city }}';
+        
+        try {
+            const response = await fetch(`/api/reviews/${city}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    rating: parseInt(rating),
+                    comment: comment
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Show success message
+                document.getElementById('successMessage').textContent = 'Review added successfully!';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addReviewModal'));
+                modal.hide();
+                
+                // Refresh the reviews section
+                const reviewsResponse = await fetch(`/api/reviews/${city}`);
+                const reviewsData = await reviewsResponse.json();
+                
+                // Update average rating
+                if (reviewsData.length > 0) {
+                    const avgRating = reviewsData.reduce((acc, rev) => acc + rev.rating, 0) / reviewsData.length;
+                    const avgElement = document.querySelector('.display-4.mb-2');
+                    if (avgElement) {
+                        avgElement.textContent = avgRating.toFixed(1);
+                    }
+                }
+                
+                // Update recent reviews
+                const recentReviews = reviewsData
+                    .sort((a, b) => b.created_at - a.created_at)
+                    .slice(0, 5);
+                    
+                const reviewsHTML = recentReviews.map(review => `
+                    <div class="review-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user-circle me-2"></i>${review.username}
+                            </h6>
+                            <div class="text-warning">
+                                ${'★'.repeat(review.rating)}
+                            </div>
+                        </div>
+                        <p class="mb-0 text-muted">${review.comment}</p>
+                    </div>
+                `).join('');
+                
+                const reviewsSection = document.querySelector('.card-body');
+                if (reviewsSection) {
+                    reviewsSection.innerHTML = reviewsHTML;
+                }
+                
+                // Reset form
+                this.reset();
+                
+                // Reload the page after a short delay to show updated reviews
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    localStorage.removeItem('token');
+                    document.getElementById('errorMessage').textContent = 'Please log in again';
+                    document.getElementById('reviewForm').style.display = 'none';
+                    document.getElementById('loginSection').style.display = 'block';
+                } else {
+                    document.getElementById('errorMessage').textContent = data.error || 'Failed to add review';
+                }
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('successMessage').style.display = 'none';
+            }
+        } catch (error) {
+            document.getElementById('errorMessage').textContent = 'An error occurred';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
