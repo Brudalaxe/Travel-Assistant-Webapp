@@ -103,7 +103,7 @@ CCGroup2/
 │   └── register.html
 ├── .env                 # Environment variables
 ├── requirements.txt     # Project dependencies
-└── run.py              # Application entry point
+└── run.py               # Application entry point
 ```
 
 ## Note
