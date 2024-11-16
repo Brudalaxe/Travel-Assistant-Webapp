@@ -7,6 +7,44 @@ import os
 
 main = Blueprint('main', __name__)
 
+WEATHER_ICONS = {
+    # Clear sky
+    '01d': 'fa-sun',
+    '01n': 'fa-moon',
+    
+    # Few clouds
+    '02d': 'fa-cloud-sun',
+    '02n': 'fa-cloud-moon',
+    
+    # Scattered clouds
+    '03d': 'fa-cloud',
+    '03n': 'fa-cloud',
+    
+    # Broken clouds
+    '04d': 'fa-cloud',
+    '04n': 'fa-cloud',
+    
+    # Shower rain
+    '09d': 'fa-cloud-showers-heavy',
+    '09n': 'fa-cloud-showers-heavy',
+    
+    # Rain
+    '10d': 'fa-cloud-rain',
+    '10n': 'fa-cloud-rain',
+    
+    # Thunderstorm
+    '11d': 'fa-bolt',
+    '11n': 'fa-bolt',
+    
+    # Snow
+    '13d': 'fa-snowflake',
+    '13n': 'fa-snowflake',
+    
+    # Mist
+    '50d': 'fa-smog',
+    '50n': 'fa-smog'
+}
+
 # Web Interface Routes
 @main.route('/')
 def index():
@@ -27,6 +65,9 @@ def search_city():
         weather_response = requests.get(weather_url)
         weather_response.raise_for_status()
         weather_data = weather_response.json()
+
+        # Get the weather icon code from the API response
+        icon_code = weather_data['weather'][0]['icon']
         
         weather = {
             'temperature': round(weather_data['main']['temp'], 1),
@@ -37,7 +78,7 @@ def search_city():
             'temp_min': round(weather_data['main']['temp_min'], 1),
             'temp_max': round(weather_data['main']['temp_max'], 1),
             'visibility': weather_data.get('visibility', 0),
-            'icon': weather_data['weather'][0]['icon']
+            'icon': WEATHER_ICONS.get(icon_code, 'fa-cloud')
         }
         
         # Get reviews
