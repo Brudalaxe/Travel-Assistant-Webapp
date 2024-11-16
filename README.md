@@ -93,7 +93,6 @@ CCGroup2/
 │   ├── __init__.py      # Application factory and configuration
 │   ├── routes.py        # Main route handlers
 │   ├── auth.py          # Authentication logic
-│   ├── models.py        # Data models
 │   └── utils.py         # Utility functions
 ├── templates/           # HTML templates
 │   ├── base.html
