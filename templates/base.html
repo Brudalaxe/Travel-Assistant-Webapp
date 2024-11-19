@@ -8,33 +8,45 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #1a1c2e 0%, #2d3047 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #e1e2e6;
         }
         
         .navbar {
-            background: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(28, 30, 44, 0.95) !important;
             backdrop-filter: blur(10px);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+        }
+
+        .navbar-light .navbar-brand,
+        .navbar-light .navbar-nav .nav-link {
+            color: #e1e2e6;
         }
         
         .card {
             border: none;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(45, 48, 71, 0.95);
+            color: #e1e2e6;
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            background: rgba(35, 38, 61, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
         .weather-icon {
             font-size: 4rem;
-            background: linear-gradient(45deg, #4a90e2, #63b3ed);
+            background: linear-gradient(45deg, #64ffda, #48bfe3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
@@ -43,28 +55,31 @@
         .temperature {
             font-size: 3.5rem;
             font-weight: 300;
-            color: #2a3166;
+            color: #e1e2e6;
         }
         
         .btn-primary {
-            background: linear-gradient(45deg, #4a90e2, #63b3ed);
+            background: linear-gradient(45deg, #48bfe3, #64ffda);
             border: none;
             padding: 10px 25px;
             border-radius: 25px;
             transition: transform 0.2s ease;
+            color: #1a1c2e;
+            font-weight: 500;
         }
         
         .btn-primary:hover {
-            background: linear-gradient(45deg, #63b3ed, #4a90e2);
+            background: linear-gradient(45deg, #64ffda, #48bfe3);
             transform: translateY(-2px);
+            color: #1a1c2e;
         }
         
         .review-card {
-            background: #fff;
+            background: rgba(35, 38, 61, 0.95);
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 10px;
-            border-left: 4px solid #4a90e2;
+            border-left: 4px solid #48bfe3;
             transition: transform 0.2s ease;
         }
         
@@ -73,25 +88,70 @@
         }
         
         .text-warning {
-            color: #f7c331 !important;
+            color: #ffd700 !important;
+        }
+        
+        .text-muted {
+            color: #9ca3af !important;
         }
         
         .modal-content {
+            background: #2d3047;
             border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #e1e2e6;
         }
         
-        .form-control {
-            border-radius: 10px;
-            border: 1px solid #e1e1e1;
-            padding: 12px;
+        .modal-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        .form-select {
+        .modal-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .form-control, .form-select {
+            background: rgba(28, 30, 44, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px;
-            border: 1px solid #e1e1e1;
             padding: 12px;
+            color: #e1e2e6;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(35, 38, 61, 0.95);
+            border-color: #48bfe3;
+            color: #e1e2e6;
+            box-shadow: 0 0 0 0.25rem rgba(72, 191, 227, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+        
+        .alert-info {
+            background: rgba(72, 191, 227, 0.2);
+            border: 1px solid rgba(72, 191, 227, 0.3);
+            color: #e1e2e6;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #e1e2e6;
+        }
+        
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #e1e2e6;
+        }
+
+        /* Weather info boxes */
+        .bg-light {
+            background: rgba(35, 38, 61, 0.95) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
         }
     </style>
 </head>
