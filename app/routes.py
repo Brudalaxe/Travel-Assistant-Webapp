@@ -165,9 +165,11 @@ def search_city():
         print(f"Error: {str(e)}")
         return render_template('error.html', message="City not found")
 
+# REQUIREMENT 1: REST API Implementation with proper response codes
 # API Routes
 @main.route('/api/weather/<city>', methods=['GET'])
 def get_weather(city):
+    # REQUIREMENT 2: External REST Services Integration
     api_key = os.getenv('WEATHER_API_KEY')
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     
@@ -188,9 +190,11 @@ def get_weather(city):
         }), 200
     except requests.exceptions.RequestException as e:
         return jsonify({'error': 'City not found'}), 404
-    
+
+# REQUIREMENT 1: REST API Implementation with proper response codes
 @main.route('/api/places/<city>', methods=['GET'])
 def get_places(city):
+    # REQUIREMENT 2: External REST Services Integration
     api_key = os.getenv("PLACES_API_KEY")
     
     if not api_key:
@@ -237,9 +241,11 @@ def get_places(city):
 
     except Exception as e:
         return jsonify({"error": "An error occurred while fetching data"}), 500
-    
+
+# REQUIREMENT 1: REST API Implementation with proper response codes
 @main.route('/api/attractions/<city>', methods=['GET'])
 def get_attractions(city):
+    # REQUIREMENT 2: External REST Services Integration
     api_key = os.getenv("PLACES_API_KEY")
     if not api_key:
         return jsonify({"error": "Geoapify API key not configured"}), 500
@@ -284,13 +290,14 @@ def get_attractions(city):
     except requests.exceptions.RequestException:
         return jsonify({"error": "An error occurred while fetching data"}), 500
 
+# REQUIREMENT 1: REST API Implementation with proper response codes
 @main.route('/api/reviews/<city>', methods=['GET'])
 def get_reviews(city):
     """
     Get all reviews for a specific city
     """
     try:
-        #reviews_ref = current_app.db.collection('reviews').where('city', '==', city).stream()
+        # REQUIREMENT 3: Cloud Database (Firestore) Integration
         reviews_ref = current_app.db.collection('reviews').where(filter=FieldFilter('city', '==', city)).stream()
         reviews = [doc.to_dict() for doc in reviews_ref]
         return jsonify(reviews), 200
