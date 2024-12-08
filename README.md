@@ -22,8 +22,8 @@ Before you begin, you'll need:
 
 1. Clone and navigate to the repository:
 ```bash
-git clone https://github.com/Brudalaxe/CCGroup2.git
-cd CCGroup2
+git clone https://github.com/Brudalaxe/Travel-Assistant-Webapp.git
+cd Travel-Assistant-Webapp
 ```
 
 2. Create a virtual environment and activate it:
