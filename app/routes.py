@@ -1,4 +1,31 @@
+'''
+app/routes.py
+
+This files handles all routing functionality for the app, including web interface routes
+and API endpoints. This includes weather data, restaurant info, tourist attractions, and
+user reviews, making use of the OpenWeatherMap and Geoapify APis.
+
+Functions:
+
+Web interface
+1. index(): Renders homepage with search form
+2. search_city(): Handles city search and data display
+3. login_page(), register_page(): Render authentication pages
+
+API Endpoints
+1. get_weather(): Fetches weather data from OpenWeatherMap
+2. get_places(): Fetches restaurant data from Geoapify
+3. get_attractions(): Fetches tourist attraction data from Geoapify
+4. get_reviews(), add_review(): Handle city reviews in Firestore
+
+Error Handlers
+1. not_found_error(): Handles 404 errors
+2. internal_error(): Handles 500 errors
+'''
+
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify, current_app
+from google.cloud.firestore_v1.base_query import FieldFilter
+import jwt
 import requests
 import datetime
 from app.auth import token_required
@@ -57,33 +84,52 @@ def search_city():
     if not city:
         return redirect(url_for('main.index'))
     
-    # Get weather data
-    api_key = os.getenv('WEATHER_API_KEY')
-    weather_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-    
     try:
-        weather_response = requests.get(weather_url)
+        # Use API endpoints instead of direct external API calls
+        weather_response = requests.get(f"http://localhost:8080/api/weather/{city}")
         weather_response.raise_for_status()
         weather_data = weather_response.json()
 
-        # Get the weather icon code from the API response
-        icon_code = weather_data['weather'][0]['icon']
-        
+        # Get weather icon (this needs to be added to the weather API response)
+        icon_code = '01d'
         weather = {
-            'temperature': round(weather_data['main']['temp'], 1),
-            'description': weather_data['weather'][0]['description'],
-            'humidity': weather_data['main']['humidity'],
-            'pressure': weather_data['main']['pressure'],
-            'wind_speed': round(weather_data['wind']['speed'], 1),
-            'temp_min': round(weather_data['main']['temp_min'], 1),
-            'temp_max': round(weather_data['main']['temp_max'], 1),
-            'visibility': weather_data.get('visibility', 0),
-            'icon': WEATHER_ICONS.get(icon_code, 'fa-cloud')
-        }
+                'temperature': weather_data['temperature'],
+                'description': weather_data['description'],
+                'humidity': weather_data['humidity'],
+                'pressure': weather_data['pressure'],
+                'wind_speed': weather_data['wind_speed'],
+                'temp_min': weather_data['temp_min'],
+                'temp_max': weather_data['temp_max'],
+                'visibility': weather_data['visibility'],
+                'icon': WEATHER_ICONS.get(weather_data['icon'], 'fa-cloud')
+            }
         
-        # Get reviews
-        reviews_ref = current_app.db.collection('reviews').where('city', '==', city).stream()
-        reviews = list([doc.to_dict() for doc in reviews_ref])
+        # Get restaurants data using API endpoint
+        try:
+            restaurants_response = requests.get(f"http://localhost:8080/api/places/{city}")
+            restaurants_response.raise_for_status()
+            restaurants_data = restaurants_response.json()
+            restaurants = restaurants_data.get('restaurants', [])
+        except requests.exceptions.RequestException as e:
+            restaurants = []
+        except Exception as e:
+            restaurants = []
+
+        # Get attractions data using API endpoint
+        try:
+            attractions_response = requests.get(f"http://localhost:8080/api/attractions/{city}")
+            if attractions_response.ok:
+                attractions_data = attractions_response.json()
+                attractions = attractions_data.get('attractions', [])
+            else:
+                attractions = []
+        except Exception as e:
+            print(f"Attractions error: {e}")
+            attractions = []
+        
+        # Get reviews using API endpoint
+        reviews_response = requests.get(f"http://localhost:8080/api/reviews/{city}")
+        reviews = reviews_response.json() if reviews_response.ok else []
         
         # Calculate average rating
         if reviews:
@@ -100,7 +146,6 @@ def search_city():
         current_user = None
         if token:
             try:
-                # Verify token and get user info
                 data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
                 current_user = {'id': data['user_id']}
             except:
@@ -112,17 +157,17 @@ def search_city():
                              reviews=reviews,
                              recent_reviews=recent_reviews,
                              average_rating=average_rating,
-                             current_user=current_user)
-    
-    except requests.exceptions.RequestException:
+                             current_user=current_user,
+                             restaurants=restaurants,
+                             attractions=attractions)
+                             
+    except Exception as e:
+        print(f"Error: {str(e)}")
         return render_template('error.html', message="City not found")
 
 # API Routes
 @main.route('/api/weather/<city>', methods=['GET'])
 def get_weather(city):
-    """
-    Get weather information for a specific city using OpenWeatherMap API
-    """
     api_key = os.getenv('WEATHER_API_KEY')
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     
@@ -131,12 +176,113 @@ def get_weather(city):
         response.raise_for_status()
         weather_data = response.json()
         return jsonify({
-            'temperature': weather_data['main']['temp'],
+            'temperature': round(weather_data['main']['temp'], 1),
             'description': weather_data['weather'][0]['description'],
-            'humidity': weather_data['main']['humidity']
+            'humidity': weather_data['main']['humidity'],
+            'pressure': weather_data['main']['pressure'],
+            'wind_speed': round(weather_data['wind']['speed'], 1),
+            'temp_min': round(weather_data['main']['temp_min'], 1),
+            'temp_max': round(weather_data['main']['temp_max'], 1),
+            'visibility': weather_data.get('visibility', 0),
+            'icon': weather_data['weather'][0]['icon']
         }), 200
     except requests.exceptions.RequestException as e:
         return jsonify({'error': 'City not found'}), 404
+    
+@main.route('/api/places/<city>', methods=['GET'])
+def get_places(city):
+    api_key = os.getenv("PLACES_API_KEY")
+    
+    if not api_key:
+        return jsonify({"error": "Geoapify API key not configured"}), 500
+
+    try:
+        # Step 1: Get coordinates
+        geocoding_url = f"https://api.geoapify.com/v1/geocode/search?text={city}&apiKey={api_key}"
+        geocoding_response = requests.get(geocoding_url)
+        geocoding_data = geocoding_response.json()
+
+        features = geocoding_data.get('features', [])
+        if not features:
+            return jsonify({"error": "City not found"}), 404
+
+        lat, lon = features[0]['geometry']['coordinates'][1], features[0]['geometry']['coordinates'][0]
+
+        # Step 2: Get restaurants
+        places_url = f"https://api.geoapify.com/v2/places"
+        places_params = {
+            "categories": "catering.restaurant",
+            "filter": f"circle:{lon},{lat},5000",  # 5 km radius
+            "limit": 5,
+            "sort": "popularity:desc",
+            "bias": f"proximity:{lon},{lat}",
+            "apiKey": api_key
+        }
+        places_response = requests.get(places_url, params=places_params)
+        places_data = places_response.json()
+
+        restaurants = [
+            {
+                "name": place['properties'].get('name', "N/A"),
+                "address": f"{place['properties'].get('street', '')}, {place['properties'].get('postcode', 'N/A')}",
+                "cuisine": place['properties'].get('catering', {}).get('cuisine', 'N/A'),
+                "opening_hours": place['properties'].get('opening_hours', 'N/A'),
+                "phone": place['properties'].get('contact', {}).get('phone', 'N/A'),
+                "website": place['properties'].get('website', 'N/A')
+            }
+            for place in places_data.get('features', [])
+        ]
+
+        return jsonify({"city": city.title(), "restaurants": restaurants}), 200
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred while fetching data"}), 500
+    
+@main.route('/api/attractions/<city>', methods=['GET'])
+def get_attractions(city):
+    api_key = os.getenv("PLACES_API_KEY")
+    if not api_key:
+        return jsonify({"error": "Geoapify API key not configured"}), 500
+
+    try:
+        # Get coordinates (same as get_places)
+        geocoding_url = f"https://api.geoapify.com/v1/geocode/search?text={city}&apiKey={api_key}"
+        geocoding_response = requests.get(geocoding_url)
+        geocoding_data = geocoding_response.json()
+        
+        features = geocoding_data.get('features', [])
+        if not features:
+            return jsonify({"error": "City not found"}), 404
+
+        lat, lon = features[0]['geometry']['coordinates'][1], features[0]['geometry']['coordinates'][0]
+
+        # Get attractions
+        places_url = f"https://api.geoapify.com/v2/places"
+        places_params = {
+            "categories": "tourism.sights,tourism.attraction,entertainment.museum,entertainment.theme_park,tourism.information.office,heritage.unesco",
+            "filter": f"circle:{lon},{lat},5000",
+            "limit": 5,
+            "sort": "popularity:desc",
+            "apiKey": api_key
+        }
+        
+        places_response = requests.get(places_url, params=places_params)
+        places_data = places_response.json()
+
+        attractions = [
+            {
+                "name": place['properties'].get('name', "N/A"),
+                "address": f"{place['properties'].get('street', '')}, {place['properties'].get('postcode', 'N/A')}",
+                "description": place['properties'].get('description', 'N/A'),
+                "website": place['properties'].get('website', 'N/A')
+            }
+            for place in places_data.get('features', [])
+        ]
+
+        return jsonify({"city": city.title(), "attractions": attractions}), 200
+
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "An error occurred while fetching data"}), 500
 
 @main.route('/api/reviews/<city>', methods=['GET'])
 def get_reviews(city):
@@ -144,7 +290,8 @@ def get_reviews(city):
     Get all reviews for a specific city
     """
     try:
-        reviews_ref = current_app.db.collection('reviews').where('city', '==', city).stream()
+        #reviews_ref = current_app.db.collection('reviews').where('city', '==', city).stream()
+        reviews_ref = current_app.db.collection('reviews').where(filter=FieldFilter('city', '==', city)).stream()
         reviews = [doc.to_dict() for doc in reviews_ref]
         return jsonify(reviews), 200
     except Exception as e:

@@ -1,5 +1,19 @@
+'''
+app/auth.py
+
+This file defines the user authentication and authorisation using JWT tokens and Firestore, 
+as well as providing user registration and login functionality.
+
+Functions:
+
+1. token_required(): Validates JWT tokens and protects routes
+2. register(): Creates new user accounts and generates authentication tokens
+3. login(): Authenticates users and provides access tokens
+'''
+
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+from google.cloud.firestore_v1.base_query import FieldFilter
 from functools import wraps
 import jwt
 import datetime
@@ -26,12 +40,8 @@ def token_required(f):
                 
             current_user = {'id': user_doc.id, **user_doc.to_dict()}
             
-        except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'error': 'Invalid token'}), 401
-        except Exception as e:
-            return jsonify({'error': 'Invalid token'}), 401
+        except Exception:
+            return jsonify({'error': 'Invalid or expired token'}), 401
         
         return f(current_user, *args, **kwargs)
     return decorated
@@ -46,7 +56,7 @@ def register():
         
         # Check if user exists
         users_ref = current_app.db.collection('users')
-        query = users_ref.where('email', '==', data['email']).limit(1).get()
+        query = users_ref.where(filter=FieldFilter('email', '==', data['email'])).limit(1).get()
         
         if len(list(query)) > 0:
             return jsonify({'error': 'User already exists'}), 400
@@ -86,7 +96,7 @@ def login():
         
         # Find user
         users_ref = current_app.db.collection('users')
-        query = users_ref.where('email', '==', data['email']).limit(1).get()
+        query = users_ref.where(filter=FieldFilter('email', '==', data['email'])).limit(1).get()
         
         user = None
         for doc in query:

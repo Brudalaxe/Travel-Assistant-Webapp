@@ -10,6 +10,9 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h2 class="h4 mb-0">Weather</h2>
+            </div>
             <div class="card-body text-center">
                 <i class="fas {{ weather.icon }} weather-icon"></i>
                 <p class="temperature mb-2">{{ weather.temperature }}°C</p>
@@ -109,6 +112,77 @@
                     <div class="text-center text-muted py-5">
                         <i class="fas fa-comment-slash fa-3x mb-3"></i>
                         <p>No reviews yet. Be the first to review!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Local Restaurants (left column, under weather) -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h2 class="h4 mb-0">Local Restaurants</h2>
+            </div>
+            <div class="card-body">
+                {% if restaurants %}
+                    <div class="row g-3">
+                        {% for restaurant in restaurants %}
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light">
+                                <h5 class="mb-2">{{ restaurant.name }}</h5>
+                                <p class="mb-2 text-muted small">{{ restaurant.address }}</p>
+                                {% if restaurant.opening_hours != "N/A" %}
+                                    <p class="mb-2 text-muted small"><i class="fas fa-clock me-2"></i>{{ restaurant.opening_hours }}</p>
+                                {% endif %}
+                                {% if restaurant.phone != "N/A" %}
+                                    <p class="mb-2 text-muted small"><i class="fas fa-phone me-2"></i>{{ restaurant.phone }}</p>
+                                {% endif %}
+                                {% if restaurant.website != "N/A" %}
+                                    <p class="mb-2 text-muted small"><i class="fas fa-globe me-2"></i>{{ restaurant.website }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-utensils fa-3x mb-3"></i>
+                        <p>No restaurants found in this area.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tourist Attractions (right column, under reviews) -->
+    <div class="col-md-6 mb-4 mt-4">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h2 class="h4 mb-0">Tourist Attractions</h2>
+            </div>
+            <div class="card-body">
+                {% if attractions %}
+                    <div class="row g-3">
+                        {% for attraction in attractions %}
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light">
+                                <h5 class="mb-2">{{ attraction.name }}</h5>
+                                <p class="mb-2 text-muted small"><i class="fas fa-map-marker-alt me-2"></i>{{ attraction.address }}</p>
+                                {% if attraction.description != "N/A" %}
+                                    <p class="mb-2 text-muted small"><i class="fas fa-info-circle me-2"></i>{{ attraction.description }}</p>
+                                {% endif %}
+                                {% if attraction.website != "N/A" %}
+                                    <p class="mb-2 text-muted small"><i class="fas fa-globe me-2"></i>{{ attraction.website }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-landmark fa-3x mb-3"></i>
+                        <p>No attractions found in this area.</p>
                     </div>
                 {% endif %}
             </div>
