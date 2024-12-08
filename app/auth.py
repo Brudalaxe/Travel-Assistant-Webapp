@@ -31,6 +31,8 @@ def token_required(f):
         try:
             if token.startswith('Bearer '):
                 token = token.split(' ')[1]
+
+            # REQUIREMENT Option 2.2: Hash-based authentication
                 
             data = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
             
