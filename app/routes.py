@@ -141,6 +141,8 @@ def search_city():
             average_rating = 0
             recent_reviews = []
 
+        # REQUIREMENT Option 2.3: User accounts and access management
+
         # Check if user is logged in
         token = request.cookies.get('token')
         current_user = None
@@ -303,6 +305,8 @@ def get_reviews(city):
         return jsonify(reviews), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# REQUIREMENT Option 2.4: Protected routes (?)
 
 @main.route('/api/reviews/<city>', methods=['POST'])
 @token_required
