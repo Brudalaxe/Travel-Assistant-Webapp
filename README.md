@@ -76,6 +76,12 @@ python run.py
 
 ### Weather
 - `GET /api/weather/<city>` - Get weather information for a specific city
+  
+### Places
+- `GET /api/places/<city>` - Get restaurant information for a specific city
+
+### Tourist Attractions
+- `GET /api/attractions/<city>` - Get tourist attractions for a specific city.
 
 ### Reviews
 - `GET /api/reviews/<city>` - Get all reviews for a specific city
