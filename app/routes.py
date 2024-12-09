@@ -31,6 +31,8 @@ import datetime
 from app.auth import token_required
 from app.utils import validate_rating
 import os
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 main = Blueprint('main', __name__)
 
@@ -86,7 +88,7 @@ def search_city():
     
     try:
         # Use API endpoints instead of direct external API calls
-        weather_response = requests.get(f"http://localhost:8080/api/weather/{city}")
+        weather_response = requests.get(f"https://localhost:443/api/weather/{city}", verify=False)
         weather_response.raise_for_status()
         weather_data = weather_response.json()
 
@@ -106,7 +108,7 @@ def search_city():
         
         # Get restaurants data using API endpoint
         try:
-            restaurants_response = requests.get(f"http://localhost:8080/api/places/{city}")
+            restaurants_response = requests.get(f"https://localhost:443/api/places/{city}", verify=False)
             restaurants_response.raise_for_status()
             restaurants_data = restaurants_response.json()
             restaurants = restaurants_data.get('restaurants', [])
@@ -117,7 +119,7 @@ def search_city():
 
         # Get attractions data using API endpoint
         try:
-            attractions_response = requests.get(f"http://localhost:8080/api/attractions/{city}")
+            attractions_response = requests.get(f"https://localhost:443/api/attractions/{city}", verify=False)
             if attractions_response.ok:
                 attractions_data = attractions_response.json()
                 attractions = attractions_data.get('attractions', [])
@@ -128,7 +130,7 @@ def search_city():
             attractions = []
         
         # Get reviews using API endpoint
-        reviews_response = requests.get(f"http://localhost:8080/api/reviews/{city}")
+        reviews_response = requests.get(f"https://localhost:443/api/reviews/{city}", verify=False)
         reviews = reviews_response.json() if reviews_response.ok else []
         
         # Calculate average rating
