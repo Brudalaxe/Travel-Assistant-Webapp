@@ -1,3 +1,9 @@
+'''
+run.py
+
+This file runs the application.
+'''
+
 from app import create_app
 
 app = create_app()
