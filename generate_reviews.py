@@ -1,3 +1,16 @@
+'''
+generate_reviews.py
+
+This file generates random reviews to fill the Firestore database with for demo
+purposes.
+
+Functions:
+
+1. generate_review(): Selects random choices for the review comments
+2. add_reviews_to_db(): Adds review to the database
+3. clear_existing_reviews(): Clears all reviews from database to refresh
+'''
+
 from google.cloud import firestore
 import random
 import datetime
