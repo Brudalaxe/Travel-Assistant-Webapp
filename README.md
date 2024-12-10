@@ -1,5 +1,7 @@
 # Travel Assistant
 
+[![Travel Assistant Demo](https://img.youtube.com/vi/wlcbZZvOrsw/maxresdefault.jpg)](https://www.youtube.com/watch?v=wlcbZZvOrsw)
+
 A Flask-based REST API that provides weather information and city reviews. Users can search for cities to view current weather conditions and read or submit reviews.
 
 ## Features
