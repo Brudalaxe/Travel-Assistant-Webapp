@@ -7,12 +7,10 @@ A Flask-based REST API that provides weather information and city reviews. Users
 ## Features
 
 - Weather information for cities using OpenWeatherMap API
-- User authentication system with JWT tokens
+- User authentication system
 - City reviews with ratings and comments
 - Google Cloud Firestore integration for data storage
 - Responsive web interface
-- Real-time weather updates
-- User review management
 
 ## Prerequisites
 
@@ -64,9 +62,9 @@ python run.py
 
 2. **User Registration/Login:**
    - Click "Register" to create a new account
-   - Use a valid email format (e.g., test@example.com)
-   - Password must be at least 6 characters
-
+   - Enter email
+   - Enter password
+     
 3. **Adding Reviews:**
    - Search for a city
    - Click "Add Review"
@@ -82,7 +80,7 @@ python run.py
 ### Places
 - `GET /api/places/<city>` - Get restaurant information for a specific city
 
-### Tourist Attractions
+### Attractions
 - `GET /api/attractions/<city>` - Get tourist attractions for a specific city.
 
 ### Reviews
@@ -113,7 +111,3 @@ CCGroup2/
 ├── requirements.txt     # Project dependencies
 └── run.py               # Application entry point
 ```
-
-## Note
-
-This setup uses shared API keys and credentials for testing purposes. We will all be accessing the same Firestore database, allowing for collaborative testing and development.
